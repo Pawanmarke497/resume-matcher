@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ai-engineer",
+    "title": "AI Engineer (RAG & Agents)",
+    "company": "Northwind AI",
+    "location": "Remote",
+    "description": "Build retrieval-augmented generation (RAG) systems and LLM-powered agents for enterprise customers. You will design pipelines with LangChain and LangGraph, serve them through FastAPI, and work with vector databases and embeddings. Strong Python and prompt engineering skills are required. Docker experience is a plus.",
+    "required_skills": ["Python", "RAG", "LLMs", "LangChain", "LangGraph", "FastAPI", "Vector Databases", "Prompt Engineering"]
+  },
+  {
+    "id": "backend-python",
+    "title": "Backend Engineer (Python)",
+    "company": "Brightpath Systems",
+    "location": "Bengaluru, India",
+    "description": "Own backend services written in Python with FastAPI and PostgreSQL. Design REST APIs, write tests with pytest, containerize services with Docker, and ship to AWS through CI/CD pipelines. Experience with Redis and microservices is a plus.",
+    "required_skills": []
+  },
+  {
+    "id": "data-scientist",
+    "title": "Data Scientist",
+    "company": "Orchard Analytics",
+    "location": "Mumbai, India",
+    "description": "Develop machine learning models for churn and demand forecasting using Python, pandas, NumPy and scikit-learn. Strong SQL and statistics foundations are required. You will present insights to business stakeholders. Experience with PyTorch is a plus.",
+    "required_skills": []
+  },
+  {
+    "id": "mlops-engineer",
+    "title": "MLOps Engineer",
+    "company": "Kestrel Labs",
+    "location": "Remote",
+    "description": "Run the platform that trains and serves our machine learning models. You will manage Kubernetes clusters, build Docker images, orchestrate pipelines with Airflow, provision infrastructure with Terraform on AWS, and maintain CI/CD. Python and MLOps experience required.",
+    "required_skills": []
+  },
+  {
+    "id": "frontend-react",
+    "title": "Frontend Engineer (React)",
+    "company": "Lumen Interfaces",
+    "location": "Pune, India",
+    "description": "Build accessible, fast web applications with React and TypeScript. You will consume REST APIs and GraphQL, write solid HTML and CSS, and add unit tests. Strong JavaScript fundamentals and Git workflow are expected.",
+    "required_skills": []
+  },
+  {
+    "id": "data-engineer",
+    "title": "Data Engineer",
+    "company": "Tidewater Data",
+    "location": "Hyderabad, India",
+    "description": "Design reliable ETL pipelines that move data into our warehouse. You will work with Spark, Airflow and Kafka, write complex SQL, and run workloads on AWS. Python and PostgreSQL experience required.",
+    "required_skills": []
+  },
+  {
+    "id": "nlp-engineer",
+    "title": "NLP Engineer",
+    "company": "Verse Language Tech",
+    "location": "Remote",
+    "description": "Fine-tune and evaluate language models for classification and information extraction. You will use PyTorch, Hugging Face, embeddings and LLMs, and apply NLP and machine learning best practices. Strong Python required.",
+    "required_skills": []
+  },
+  {
+    "id": "fullstack-node",
+    "title": "Full-Stack Engineer",
+    "company": "Pinecone Street Studio",
+    "location": "Remote",
+    "description": "Ship features end to end with Node.js, React and TypeScript on top of MongoDB. You will design REST APIs, containerize with Docker, and work in an agile team.",
+    "required_skills": []
+  },
+  {
+    "id": "devops-engineer",
+    "title": "DevOps Engineer",
+    "company": "Harbor Cloud Services",
+    "location": "Chennai, India",
+    "description": "Automate infrastructure with Terraform and Kubernetes on AWS. You will maintain CI/CD pipelines, harden Linux hosts, build Docker images and keep everything in Git. Experience with Azure or GCP is a plus.",
+    "required_skills": []
+  }
+]

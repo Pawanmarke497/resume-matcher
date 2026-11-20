@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume &amp; Job Matcher</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --ink:#1c1c1a; --muted:#6b6b66; --line:#e3e3de; --accent:#2f5d50; --accent-ink:#fff; --warn:#8a5a00; --warn-bg:#fff6e0; --bad:#a33; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161615; --card:#1f1f1d; --ink:#ececE8; --muted:#a0a09a; --line:#33332f; --accent:#6fb59f; --accent-ink:#10201a; --warn:#f0c36a; --warn-bg:#2b2412; --bad:#e58; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--ink); }
+  main { max-width:860px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
+  form { display:grid; gap:14px; }
+  label { font-weight:600; font-size:.9rem; display:grid; gap:6px; }
+  input[type=file], input[type=number], select { font:inherit; padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); }
+  .row { display:flex; gap:16px; flex-wrap:wrap; align-items:end; }
+  .check { display:flex; align-items:center; gap:8px; font-weight:500; }
+  button { font:inherit; font-weight:600; padding:10px 18px; border:0; border-radius:8px; background:var(--accent); color:var(--accent-ink); cursor:pointer; }
+  button:disabled { opacity:.6; cursor:wait; }
+  .warn { background:var(--warn-bg); color:var(--warn); border-radius:8px; padding:10px 12px; font-size:.9rem; margin-bottom:12px; }
+  .err { color:var(--bad); font-weight:600; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .chip { font-size:.8rem; padding:2px 10px; border-radius:999px; border:1px solid var(--line); }
+  .chip.ok { border-color:var(--accent); color:var(--accent); }
+  .chip.miss { color:var(--muted); }
+  .match { display:grid; grid-template-columns:64px 1fr; gap:14px; padding:14px 0; border-top:1px solid var(--line); }
+  .match:first-of-type { border-top:0; }
+  .score { font-size:1.4rem; font-weight:700; color:var(--accent); text-align:center; }
+  .score small { display:block; font-size:.7rem; font-weight:500; color:var(--muted); }
+  .title { font-weight:600; } .meta { color:var(--muted); font-size:.9rem; }
+  h2 { font-size:1.05rem; margin:0 0 10px; } h3 { font-size:.95rem; margin:14px 0 4px; }
+  ul { margin:4px 0 0; padding-left:20px; }
+  pre { white-space:pre-wrap; font:inherit; margin:0; }
+  [hidden] { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Resume &amp; Job Matcher</h1>
+  <p class="sub">Upload a resume to see ranked job matches, tailored feedback, and an optional cover letter.</p>
+
+  <div class="card">
+    <form id="form">
+      <label>Resume (PDF, DOCX or TXT)
+        <input type="file" name="file" accept=".pdf,.docx,.txt,.md" required>
+      </label>
+      <div class="row">
+        <label>Matches to show
+          <input type="number" name="top_k" value="5" min="1" max="20">
+        </label>
+        <label>Feedback &amp; letter target
+          <select name="target_job_id" id="target"><option value="">Best match</option></select>
+        </label>
+        <label class="check"><input type="checkbox" name="generate_cover_letter" value="true"> Write a cover letter</label>
+      </div>
+      <div><button id="go" type="submit">Analyze resume</button></div>
+    </form>
+  </div>
+
+  <div id="status" class="err" hidden></div>
+  <div id="out" hidden></div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const chips = (items, cls) => `<div class="chips">${items.map(s => `<span class="chip ${cls}">${esc(s)}</span>`).join("")}</div>`;
+const list = (items) => items.length ? `<ul>${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : "<p class='meta'>None</p>";
+
+fetch("/jobs").then(r => r.json()).then(jobs => {
+  $("target").insertAdjacentHTML("beforeend",
+    jobs.map(j => `<option value="${esc(j.id)}">${esc(j.title)}, ${esc(j.company)}</option>`).join(""));
+}).catch(() => {});
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("go"), status = $("status"), out = $("out");
+  btn.disabled = true; btn.textContent = "Analyzing…"; status.hidden = true; out.hidden = true;
+  try {
+    const fd = new FormData(e.target);
+    if (!fd.get("generate_cover_letter")) fd.set("generate_cover_letter", "false");
+    const res = await fetch("/analyze", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+    render(data);
+  } catch (err) {
+    status.textContent = err.message; status.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = "Analyze resume";
+  }
+});
+
+function render(d) {
+  const p = d.profile, c = d.critique;
+  let html = (d.warnings || []).map(w => `<div class="warn">${esc(w)}</div>`).join("");
+
+  html += `<div class="card"><h2>${esc(p.full_name || "Candidate")}</h2>
+    <div class="meta">${[p.headline, p.email, p.phone, p.years_experience != null ? p.years_experience + " yrs experience" : ""].filter(Boolean).map(esc).join(" · ")}</div>
+    <h3>Skills detected</h3>${chips(p.skills, "ok")}</div>`;
+
+  html += `<div class="card"><h2>Top matches</h2>` + d.matches.map(m => `
+    <div class="match">
+      <div class="score">${m.score.toFixed(0)}<small>/ 100</small></div>
+      <div>
+        <div class="title">${esc(m.title)}</div>
+        <div class="meta">${esc(m.company)}${m.location ? " · " + esc(m.location) : ""}${m.job_id === d.target_job_id ? " · feedback target" : ""}</div>
+        ${m.matched_skills.length ? chips(m.matched_skills, "ok") : ""}
+        ${m.missing_skills.length ? chips(m.missing_skills, "miss") : ""}
+      </div>
+    </div>`).join("") + `</div>`;
+
+  if (c) {
+    html += `<div class="card"><h2>Feedback</h2><p>${esc(c.fit_summary)}</p>
+      <h3>Strengths</h3>${list(c.strengths)}<h3>Gaps</h3>${list(c.gaps)}<h3>Suggestions</h3>${list(c.suggestions)}</div>`;
+  }
+  if (d.cover_letter) {
+    html += `<div class="card"><h2>Cover letter</h2><pre>${esc(d.cover_letter)}</pre></div>`;
+  }
+  $("out").innerHTML = html; $("out").hidden = false;
+}
+</script>
+</body>
+</html>
